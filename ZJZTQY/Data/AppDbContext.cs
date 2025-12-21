@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection.Emit;
 using ZJZTQY.Models;
 
-namespace TQY.Data
+namespace ZJZTQY.Data
 {
     public class AppDbContext : DbContext
     {

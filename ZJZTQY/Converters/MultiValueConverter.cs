@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace TQY.Converters
+namespace ZJZTQY.Converters
 {
     public class EmailValidMultiConverter : IMultiValueConverter
     {
