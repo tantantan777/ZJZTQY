@@ -18,6 +18,8 @@ namespace ZJZTQY.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
         private string _email = string.Empty;
+        [ObservableProperty]
+        private string _loginButtonContent = "登 录 / 注 册";
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
@@ -35,6 +37,10 @@ namespace ZJZTQY.ViewModels
 
         [ObservableProperty]
         private bool _isSendingCode = false;
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(LoginCommand))] // 状态改变时，自动刷新按钮是否可用
+        private bool _isLoggingIn = false;
+
 
         public LoginViewModel(AuthService authService)
         {
@@ -43,7 +49,9 @@ namespace ZJZTQY.ViewModels
 
         private bool CanLogin()
         {
-            return !string.IsNullOrWhiteSpace(Email) &&
+            // 登录中不允许再次点击
+            return !IsLoggingIn &&
+                   !string.IsNullOrWhiteSpace(Email) &&
                    !string.IsNullOrWhiteSpace(Code) &&
                    IsAgreed;
         }
@@ -90,33 +98,37 @@ namespace ZJZTQY.ViewModels
         {
             if (!IsAgreed)
             {
-                // ★ 替换 Warning
-                Growl.Warning("请先同意服务条款", Token);
+                Growl.Warning("请先同意服务条款", "LoginToken");
                 return;
             }
 
-            var result = await _authService.LoginAsync(Email, Code);
+            // ★ 开启加载动画，并禁用按钮
+            IsLoggingIn = true;
+            LoginButtonContent = "正在登录...";
 
-            if (result.IsSuccess)
+            try
             {
-                if (IsRemembered)
+                var result = await _authService.LoginAsync(Email, Code);
+
+                if (result.IsSuccess)
                 {
-                    SessionHelper.SaveUser(result.Token);
+                    if (IsRemembered) SessionHelper.SaveUser(result.Token);
+                    else SessionHelper.Clear();
+
+                    Growl.Success("登录成功", "LoginToken");
+                    await Task.Delay(500);
+                    NavigateToMainPageAction?.Invoke();
                 }
                 else
                 {
-                    SessionHelper.Clear();
+                    Growl.Error(result.Message, "LoginToken");
                 }
-
-                // ★ 替换 Success
-                Growl.Success("登录成功", Token);
-                await Task.Delay(500);
-                NavigateToMainPageAction?.Invoke();
             }
-            else
+            finally
             {
-                // ★ 替换 Error
-                Growl.Error(result.Message, Token);
+                // ★ 无论成功失败，一定要关闭加载动画
+                IsLoggingIn = false;
+                LoginButtonContent = "登 录 / 注 册";
             }
         }
     }
