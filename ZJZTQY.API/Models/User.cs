@@ -2,15 +2,20 @@
 //更新数据库Update-Database
 
 using System;
+using System.ComponentModel.DataAnnotations;
 
-namespace ZJZTQY.Models
+namespace ZJZTQY.API.Models
 {
     public class User
     {
+        [Key]
         public int Id { get; set; }
 
+        // --- 1. 账号核心信息 ---
+        [Required]
         public string Username { get; set; } = string.Empty; // 用户名 (通常存邮箱前缀或昵称)
 
+        [Required]
         public string Email { get; set; } = string.Empty;    // 登录邮箱 (唯一标识)
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // 注册日期

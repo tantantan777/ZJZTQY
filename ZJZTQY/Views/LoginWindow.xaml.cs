@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using ZJZTQY.Services;
 using ZJZTQY.ViewModels;
-using ZJZTQY.Views; // 引用 OA 页面所在的命名空间
+using ZJZTQY.Views;
 
 namespace ZJZTQY.Views
 {
@@ -14,20 +14,15 @@ namespace ZJZTQY.Views
         {
             InitializeComponent();
 
-            // 1. 读取配置
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            IConfiguration config = builder.Build();
+            // ★★★ 重构点：不再读取 appsettings，也不再创建 Email/Database 服务 ★★★
 
-            // 2. 创建服务
-            var emailService = new EmailService(config);
-            var dbService = new DatabaseService();
+            // 1. 创建新的 HTTP 认证服务
+            var authService = new AuthService();
 
-            // 3. 注入 ViewModel (我们可以继续复用 LoginPageViewModel，逻辑是一样的)
-            var viewModel = new LoginPageViewModel(emailService, dbService);
+            // 2. 注入 ViewModel (现在只需要 AuthService)
+            var viewModel = new LoginViewModel(authService);
 
-            // 4. 处理跳转：登录成功后 -> 打开 OA 主页，关闭登录窗口
+            // 3. 处理跳转逻辑：登录成功后 -> 打开 OA 主页，关闭登录窗口
             viewModel.NavigateToMainPageAction = () =>
             {
                 // 创建 OA 主窗口
@@ -38,19 +33,22 @@ namespace ZJZTQY.Views
                 this.Close();
             };
 
+            // 4. 绑定上下文
             DataContext = viewModel;
         }
 
-        // --- 下面是原来的点击事件 ---
+        // --- 下面是保留的原有逻辑（处理超链接点击） ---
 
         private void OnServicePolicy(object sender, RoutedEventArgs e)
         {
+            // 注意：确保你的 Assets/Policies/service.html 文件存在
             var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Policies", "service.html");
             OpenUrl(path);
         }
 
         private void OnPrivacyPolicy(object sender, RoutedEventArgs e)
         {
+            // 注意：确保你的 Assets/Policies/privacy.html 文件存在
             var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Policies", "privacy.html");
             OpenUrl(path);
         }
