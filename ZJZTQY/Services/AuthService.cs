@@ -15,18 +15,16 @@ namespace ZJZTQY.Services
         {
             try
             {
-                // 设置请求头：Authorization: Bearer <token>
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                // 请求刚才写的 /api/Auth/me 接口
                 var response = await _httpClient.GetAsync("/api/Auth/me");
 
-                return response.IsSuccessStatusCode; // 200 OK 表示有效，401 表示过期
+                return response.IsSuccessStatusCode;
             }
             catch
             {
-                return false; // 网络不通也视为校验失败
+                return false;
             }
         }
         public AuthService()
@@ -35,11 +33,11 @@ namespace ZJZTQY.Services
             _httpClient.BaseAddress = new Uri(BaseUrl);
         }
 
-        // 定义接收数据的格式
+
         public record LoginResponse(string Message, string Token, UserDto User);
         public record UserDto(string Username, string Email, string Role);
 
-        // 1. 发送验证码
+    
         public async Task<bool> SendCodeAsync(string email)
         {
             try
@@ -53,7 +51,7 @@ namespace ZJZTQY.Services
             }
         }
 
-        // 2. 登录
+
         public async Task<(bool IsSuccess, string Message, string? Token)> LoginAsync(string email, string code)
         {
             try
@@ -67,7 +65,7 @@ namespace ZJZTQY.Services
                 }
                 else
                 {
-                    // 尝试读取后端返回的错误信息
+
                     var errorStr = await response.Content.ReadAsStringAsync();
                     return (false, "登录失败: " + errorStr, null);
                 }

@@ -150,7 +150,7 @@
                         IsEnabled="{Binding IsLoggingIn, Converter={StaticResource InverseBoolConverter}}"/>
             </StackPanel>
         </Grid>
-        <hc:ScrollViewer Grid.ColumnSpan="2" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" IsHitTestVisible="False">
+        <hc:ScrollViewer Grid.ColumnSpan="2" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0">
             <StackPanel hc:Growl.Token="LoginToken" VerticalAlignment="Top"/>
         </hc:ScrollViewer>
     </Grid>

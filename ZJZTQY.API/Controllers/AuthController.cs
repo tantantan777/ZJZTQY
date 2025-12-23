@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using ZJZTQY.API.Services;
-using ZJZTQY.API.Data;   // 引用数据库
-using ZJZTQY.API.Models; // 引用用户模型
+using ZJZTQY.API.Data;  
+using ZJZTQY.API.Models;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,10 +18,10 @@ namespace ZJZTQY.API.Controllers
     {
         private readonly EmailService _emailService;
         private readonly IMemoryCache _cache;
-        private readonly AppDbContext _context;       // 新增：数据库上下文
-        private readonly IConfiguration _configuration; // 新增：读取配置
+        private readonly AppDbContext _context;      
+        private readonly IConfiguration _configuration;
 
-        // 构造函数注入所有依赖
+
         public AuthController(EmailService emailService, IMemoryCache cache, AppDbContext context, IConfiguration configuration)
         {
             _emailService = emailService;
@@ -35,10 +35,10 @@ namespace ZJZTQY.API.Controllers
             [Required][EmailAddress] public string Email { get; set; } = string.Empty;
         }
         [HttpGet("me")]
-        [Microsoft.AspNetCore.Authorization.Authorize] // 只有带有效 Token 才能访问
+        [Microsoft.AspNetCore.Authorization.Authorize] 
         public IActionResult GetMe()
         {
-            // 从 Token 中解析出 UserID 或 Email (User.Claims 已经被中间件自动填充了)
+
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
             var name = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
@@ -51,7 +51,7 @@ namespace ZJZTQY.API.Controllers
                 message = "Token 有效"
             });
         }
-        // ★★★ 新增：登录请求模型 ★★★
+
         public class LoginRequest
         {
             [Required][EmailAddress] public string Email { get; set; } = string.Empty;
@@ -75,29 +75,28 @@ namespace ZJZTQY.API.Controllers
             }
         }
 
-        // ★★★ 新增：登录接口 ★★★
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // 1. 校验验证码
+
             if (!_cache.TryGetValue(request.Email, out string? cachedCode) || cachedCode != request.Code)
             {
                 return BadRequest(new { message = "验证码错误或已失效" });
             }
 
-            // 验证成功，立即清除验证码（防止重复使用）
+ 
             _cache.Remove(request.Email);
 
-            // 2. 查询或注册用户
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null)
             {
-                // 如果是新用户，自动注册
+ 
                 user = new User
                 {
                     Email = request.Email,
-                    Username = request.Email.Split('@')[0], // 默认用邮箱前缀做用户名
+                    Username = request.Email.Split('@')[0],
                     CreatedAt = DateTime.UtcNow,
                     Role = "User",
                     IsActive = true,
@@ -107,19 +106,19 @@ namespace ZJZTQY.API.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // 3. 生成 JWT Token
+
             var token = GenerateJwtToken(user);
 
-            // 4. 返回结果
+
             return Ok(new
             {
                 message = "登录成功",
                 token = token,
-                user = new { user.Username, user.Email, user.Role } // 返回部分用户信息
+                user = new { user.Username, user.Email, user.Role } 
             });
         }
 
-        // 私有方法：生成 Token
+
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection; // 引用它为了能获取 OA 窗口
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -16,14 +16,12 @@ namespace ZJZTQY.Views
 
             viewModel.NavigateToMainPageAction = () =>
             {
-                // 跳转时也使用 DI 获取新窗口
                 var oaWindow = serviceProvider.GetRequiredService<Oa>();
                 oaWindow.Show();
                 this.Close();
             };
         }
 
-        // --- 超链接点击逻辑保持不变 ---
         private void OnServicePolicy(object sender, RoutedEventArgs e)
         {
             var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Policies", "service.html");
