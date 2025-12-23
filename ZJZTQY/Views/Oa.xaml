@@ -3,10 +3,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ZJZTQY.Views"
         mc:Ignorable="d"
-        Title="Oa" Height="450" Width="800">
+        Title="筑恒智 OA 主页" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen">
     <Grid>
-        
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="欢迎进入 OA 系统" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+
+            <TextBlock Text="测试说明：" Foreground="Gray" Margin="0,0,0,10"/>
+            <TextBlock Text="1. 点击【退出登录】：会清除 Token。下次启动将进入登录页。" Foreground="Gray"/>
+            <TextBlock Text="2. 点击【直接退出】：保留 Token。下次启动将自动进入此页面（如果 Token 未过期）。" Foreground="Gray" Margin="0,0,0,30"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="退出登录 (Clear Token)" 
+                        Command="{Binding LogoutCommand}" 
+                        Width="180" Height="40" Background="#FF5722" Foreground="White"/>
+
+                <Button Content="直接退出 (Keep Token)" 
+                        Command="{Binding ExitAppCommand}" 
+                        Width="180" Height="40" Background="#2196F3" Foreground="White"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>

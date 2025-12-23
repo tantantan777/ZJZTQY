@@ -26,6 +26,7 @@ namespace ZJZTQY
 
                     // 3. 注册视图模型 (ViewModel)
                     services.AddTransient<LoginViewModel>();
+                    services.AddTransient<OaViewModel>();
                 })
                 .Build();
         }
