@@ -1,54 +1,40 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection; // 引用它为了能获取 OA 窗口
+using System;
 using System.Diagnostics;
-using System.IO;
 using System.Windows;
-using ZJZTQY.Services;
 using ZJZTQY.ViewModels;
-using ZJZTQY.Views;
 
 namespace ZJZTQY.Views
 {
     public partial class LoginWindow : HandyControl.Controls.Window
     {
-        public LoginWindow()
+        // 构造函数：直接接收 ViewModel 和 ServiceProvider
+        // 容器会自动把它们填进去
+        public LoginWindow(LoginViewModel viewModel, IServiceProvider serviceProvider)
         {
             InitializeComponent();
+            DataContext = viewModel;
 
-            // ★★★ 重构点：不再读取 appsettings，也不再创建 Email/Database 服务 ★★★
-
-            // 1. 创建新的 HTTP 认证服务
-            var authService = new AuthService();
-
-            // 2. 注入 ViewModel (现在只需要 AuthService)
-            var viewModel = new LoginViewModel(authService);
-
-            // 3. 处理跳转逻辑：登录成功后 -> 打开 OA 主页，关闭登录窗口
+            // 配置 ViewModel 中的跳转逻辑
             viewModel.NavigateToMainPageAction = () =>
             {
-                // 创建 OA 主窗口
-                var oaWindow = new Oa();
+                // 使用 ServiceProvider 获取 OA 窗口实例 (这样 OA 窗口也能享受依赖注入)
+                var oaWindow = serviceProvider.GetRequiredService<Oa>();
                 oaWindow.Show();
 
-                // 关闭当前的登录窗口
                 this.Close();
             };
-
-            // 4. 绑定上下文
-            DataContext = viewModel;
         }
 
-        // --- 下面是保留的原有逻辑（处理超链接点击） ---
-
+        // --- 超链接点击逻辑保持不变 ---
         private void OnServicePolicy(object sender, RoutedEventArgs e)
         {
-            // 注意：确保你的 Assets/Policies/service.html 文件存在
             var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Policies", "service.html");
             OpenUrl(path);
         }
 
         private void OnPrivacyPolicy(object sender, RoutedEventArgs e)
         {
-            // 注意：确保你的 Assets/Policies/privacy.html 文件存在
             var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Policies", "privacy.html");
             OpenUrl(path);
         }
@@ -57,11 +43,7 @@ namespace ZJZTQY.Views
         {
             try
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
+                Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
             }
             catch (Exception ex)
             {

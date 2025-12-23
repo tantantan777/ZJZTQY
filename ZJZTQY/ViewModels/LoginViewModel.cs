@@ -25,7 +25,7 @@ namespace ZJZTQY.ViewModels
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
-        private bool _isAgreed = false;
+        private bool _isAgreed = true;
 
         [ObservableProperty]
         private bool _isRemembered = true;
