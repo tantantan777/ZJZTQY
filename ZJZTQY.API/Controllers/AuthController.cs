@@ -34,7 +34,23 @@ namespace ZJZTQY.API.Controllers
         {
             [Required][EmailAddress] public string Email { get; set; } = string.Empty;
         }
+        [HttpGet("me")]
+        [Microsoft.AspNetCore.Authorization.Authorize] // 只有带有效 Token 才能访问
+        public IActionResult GetMe()
+        {
+            // 从 Token 中解析出 UserID 或 Email (User.Claims 已经被中间件自动填充了)
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var name = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
+            return Ok(new
+            {
+                email,
+                role,
+                username = name,
+                message = "Token 有效"
+            });
+        }
         // ★★★ 新增：登录请求模型 ★★★
         public class LoginRequest
         {

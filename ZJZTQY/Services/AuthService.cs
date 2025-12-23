@@ -11,7 +11,24 @@ namespace ZJZTQY.Services
 
 
         private const string BaseUrl = "http://localhost:5142";
+        public async Task<bool> CheckTokenAsync(string token)
+        {
+            try
+            {
+                // 设置请求头：Authorization: Bearer <token>
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
+                // 请求刚才写的 /api/Auth/me 接口
+                var response = await _httpClient.GetAsync("/api/Auth/me");
+
+                return response.IsSuccessStatusCode; // 200 OK 表示有效，401 表示过期
+            }
+            catch
+            {
+                return false; // 网络不通也视为校验失败
+            }
+        }
         public AuthService()
         {
             _httpClient = new HttpClient();
