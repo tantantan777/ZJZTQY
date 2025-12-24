@@ -45,4 +45,5 @@ namespace ZJZTQY.Models
         // --- 5. 系统权限 ---
         public string Role { get; set; } = "User";             // 角色
         public bool IsActive { get; set; } = true;             // 账号是否启用
+    }
 }
