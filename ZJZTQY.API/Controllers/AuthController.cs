@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using ZJZTQY.API.Services;
 using ZJZTQY.API.Data;
 using ZJZTQY.API.Models;
+using ZJZTQY.API.Extensions; // 确保引用了扩展方法命名空间
 
 namespace ZJZTQY.API.Controllers
 {
@@ -14,16 +15,11 @@ namespace ZJZTQY.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly EmailService _emailService;
-        private readonly TokenService _tokenService; // 注入 TokenService
+        private readonly TokenService _tokenService;
         private readonly IMemoryCache _cache;
         private readonly AppDbContext _context;
 
-        // 构造函数注入所有依赖
-        public AuthController(
-            EmailService emailService,
-            TokenService tokenService,
-            IMemoryCache cache,
-            AppDbContext context)
+        public AuthController(EmailService emailService, TokenService tokenService, IMemoryCache cache, AppDbContext context)
         {
             _emailService = emailService;
             _tokenService = tokenService;
@@ -31,7 +27,7 @@ namespace ZJZTQY.API.Controllers
             _context = context;
         }
 
-        // --- 请求模型定义 ---
+        // --- 请求模型 ---
         public class SendCodeRequest
         {
             [Required][EmailAddress] public string Email { get; set; } = string.Empty;
@@ -43,21 +39,22 @@ namespace ZJZTQY.API.Controllers
             [Required] public string Code { get; set; } = string.Empty;
         }
 
-        // --- API 接口 ---
+        // --- 接口方法 ---
 
         [HttpGet("me")]
         [Microsoft.AspNetCore.Authorization.Authorize]
         public IActionResult GetMe()
         {
-            // 从当前 Token 中解析用户信息
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            // 使用扩展方法获取用户信息，代码更简洁
+            var email = User.GetEmail();
+            var name = User.GetUsername();
+            var id = User.GetUserId();
+            // 如果 Extension 中没有 GetRole，可以使用原生方法
             var role = User.FindFirstValue(ClaimTypes.Role);
-            var name = User.FindFirstValue(ClaimTypes.Name);
-            var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             return Ok(new
             {
-                id = idStr,
+                id,
                 email,
                 role,
                 username = name,
@@ -68,10 +65,9 @@ namespace ZJZTQY.API.Controllers
         [HttpPost("send-code")]
         public async Task<IActionResult> SendCode([FromBody] SendCodeRequest request)
         {
-            // 生成 6 位随机验证码
             var code = System.Security.Cryptography.RandomNumberGenerator.GetInt32(100000, 999999).ToString();
 
-            // 存入缓存，有效期 5 分钟
+            // 缓存 5 分钟
             _cache.Set(request.Email, code, TimeSpan.FromMinutes(5));
 
             try
@@ -81,7 +77,6 @@ namespace ZJZTQY.API.Controllers
             }
             catch (Exception ex)
             {
-                // 实际生产中建议记录日志 (Logger) 而不是直接返回错误详情
                 return BadRequest(new { message = $"发送失败: {ex.Message}" });
             }
         }
@@ -89,21 +84,19 @@ namespace ZJZTQY.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // 1. 校验验证码
+            // 1. 验证码校验
             if (!_cache.TryGetValue(request.Email, out string? cachedCode) || cachedCode != request.Code)
             {
                 return BadRequest(new { message = "验证码错误或已失效" });
             }
 
-            // 验证通过，清除缓存（防止重复使用）
             _cache.Remove(request.Email);
 
-            // 2. 查询或注册用户
+            // 2. 查找或注册用户
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null)
             {
-                // 自动注册逻辑
                 user = new User
                 {
                     Email = request.Email,
@@ -117,10 +110,9 @@ namespace ZJZTQY.API.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // 3. 生成 Token (调用 TokenService)
+            // 3. 生成 Token
             var token = _tokenService.GenerateJwtToken(user);
 
-            // 4. 返回结果
             return Ok(new
             {
                 message = "登录成功",
