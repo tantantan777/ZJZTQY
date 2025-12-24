@@ -74,6 +74,17 @@ namespace ZJZTQY
 
         protected override async void OnExit(ExitEventArgs e)
         {
+            // 获取当前保存的 Token
+            string? token = Helpers.SessionHelper.GetUser();
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var authService = AppHost!.Services.GetRequiredService<AuthService>();
+                // 调用后端 API 设置为离线
+                // 注意：OnExit 是同步方法，这里尽量快速执行，或者使用 Fire-and-forget
+                await authService.LogoutAsync(token);
+            }
+
             using (AppHost)
             {
                 await AppHost!.StopAsync();

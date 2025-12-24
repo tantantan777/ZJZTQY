@@ -89,7 +89,6 @@ namespace ZJZTQY.API.Controllers
             {
                 return BadRequest(new { message = "验证码错误或已失效" });
             }
-
             _cache.Remove(request.Email);
 
             // 2. 查找或注册用户
@@ -97,18 +96,27 @@ namespace ZJZTQY.API.Controllers
 
             if (user == null)
             {
+                // 【修改点】新用户注册：只存邮箱、时间、在线状态
+                // Username 是必填项，暂用邮箱前缀填充，否则数据库报错
                 user = new User
                 {
                     Email = request.Email,
                     Username = request.Email.Split('@')[0],
                     CreatedAt = DateTime.UtcNow,
-                    Role = "User",
-                    IsActive = true,
-                    Company = "筑恒基石"
+                    IsOnline = true, // 注册即登录 -> 在线
+                    IsActive = true  // 激活状态
+                    // 其他字段全部留空 (string.Empty)
                 };
                 _context.Users.Add(user);
-                await _context.SaveChangesAsync();
             }
+            else
+            {
+                // 【修改点】老用户登录：更新为在线状态
+                user.IsOnline = true;
+                _context.Users.Update(user); // 确保标记为修改
+            }
+
+            await _context.SaveChangesAsync();
 
             // 3. 生成 Token
             var token = _tokenService.GenerateJwtToken(user);
@@ -119,6 +127,23 @@ namespace ZJZTQY.API.Controllers
                 token = token,
                 user = new { user.Username, user.Email, user.Role }
             });
+        }
+
+        // 【新增点】退出登录接口
+        [HttpPost("logout")]
+        [Microsoft.AspNetCore.Authorization.Authorize] // 需要登录才能退出
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.GetUserId();
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user != null)
+            {
+                user.IsOnline = false; // 设置为离线
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new { message = "已退出登录" });
         }
     }
 }

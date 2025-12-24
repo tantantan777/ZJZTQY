@@ -20,7 +20,21 @@ namespace ZJZTQY.Services
             string baseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5142";
             _httpClient.BaseAddress = new Uri(baseUrl);
         }
+        public async Task LogoutAsync(string token)
+        {
+            try
+            {
+                // 需要构建请求带上 Authorization Header
+                var request = new HttpRequestMessage(HttpMethod.Post, "/api/Auth/logout");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
+                await _httpClient.SendAsync(request);
+            }
+            catch
+            {
+                // 退出时的异常通常可以忽略（如网络已断开）
+            }
+        }
         public async Task<bool> CheckTokenAsync(string token)
         {
             try
