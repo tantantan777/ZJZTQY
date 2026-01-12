@@ -2,37 +2,58 @@
            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:hc="https://handyorg.github.io/handycontrol"
-           Title="筑恒智 OA" Height="800" Width="1280"
+           Title="筑恒智 OA" Height="850" Width="1400"
            WindowStartupLocation="CenterScreen"
            ShowNonClientArea="True"
+           FontFamily="Microsoft YaHei UI"
            Icon="/Assets/logo.ico">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="64"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" 
-                Panel.ZIndex="1"
+                Panel.ZIndex="10"
                 Background="{DynamicResource RegionBrush}" 
                 Effect="{StaticResource EffectShadow2}">
 
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="240"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
-                    <hc:Gravatar Width="32" Height="32" Style="{StaticResource GravatarCircle}"/>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
+                    <Border Width="32" Height="32" Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Margin="0,0,12,0">
+                        <TextBlock Text="OA" Foreground="White" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold"/>
+                    </Border>
+                    <TextBlock Text="筑恒智 OA" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
+
+                    <hc:Badge Value="3" Style="{StaticResource BadgeDanger}" Margin="0,0,15,0">
+                        <Button Content="消息" Style="{StaticResource ButtonCustom}" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </hc:Badge>
+
+                    <Button Content="设置" Style="{StaticResource ButtonCustom}" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,15,0"/>
+
+                    <Rectangle Width="1" Height="20" Fill="{DynamicResource BorderBrush}" Margin="0,0,20,0"/>
+
+                    <StackPanel Orientation="Horizontal" Cursor="Hand">
+                        <hc:Gravatar Width="32" Height="32" Style="{StaticResource GravatarCircle}"/>
+                        <TextBlock Text="管理员" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource PrimaryTextBrush}" FontWeight="SemiBold"/>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="240"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -41,21 +62,46 @@
                     BorderThickness="0,0,1,0" 
                     BorderBrush="{DynamicResource BorderBrush}">
 
-                <hc:SideMenu Background="Transparent" Margin="0,15">
-                    <hc:SideMenuItem Header="仪表盘" IsSelected="True"/>
-                    <hc:SideMenuItem Header="工程管理"/>
-                    <hc:SideMenuItem Header="工程文件"/>
-                    <hc:SideMenuItem Header="工程台账"/>
-                    <hc:SideMenuItem Header="工期管理"/>
-                    <hc:SideMenuItem Header="隐蔽资料"/>
-                    <hc:SideMenuItem Header="影像资料"/>
-                    <hc:SideMenuItem Header="竣工资料"/>
-                    <hc:SideMenuItem Header="晴雨表"/>
-                </hc:SideMenu>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <hc:ScrollViewer IsInertiaEnabled="True">
+                        <hc:SideMenu Background="Transparent" Margin="0,15" ItemContainerStyle="{StaticResource SideMenuItemBaseStyle}">
+
+                            <hc:SideMenuItem Header="仪表盘" IsSelected="True"/>
+
+                            <hc:SideMenuItem Header="工程中心" IsEnabled="False" Foreground="{DynamicResource ThirdTextBrush}" FontWeight="Bold" Margin="0,20,0,5" Padding="25,0,0,0"/>
+
+                            <hc:SideMenuItem Header="工程管理"/>
+                            <hc:SideMenuItem Header="工程文件"/>
+                            <hc:SideMenuItem Header="工程台账"/>
+                            <hc:SideMenuItem Header="工期管理"/>
+
+                            <hc:SideMenuItem Header="资料归档" IsEnabled="False" Foreground="{DynamicResource ThirdTextBrush}" FontWeight="Bold" Margin="0,20,0,5" Padding="25,0,0,0"/>
+
+                            <hc:SideMenuItem Header="隐蔽资料"/>
+                            <hc:SideMenuItem Header="影像资料"/>
+                            <hc:SideMenuItem Header="竣工资料"/>
+
+                            <hc:SideMenuItem Header="综合管理" IsEnabled="False" Foreground="{DynamicResource ThirdTextBrush}" FontWeight="Bold" Margin="0,20,0,5" Padding="25,0,0,0"/>
+                            <hc:SideMenuItem Header="晴雨表"/>
+                        </hc:SideMenu>
+                    </hc:ScrollViewer>
+
+                    <TextBlock Grid.Row="1" Text="v1.0.2" Foreground="{DynamicResource ThirdTextBrush}" HorizontalAlignment="Center" Margin="10"/>
+                </Grid>
             </Border>
 
-            <Grid Grid.Column="1" 
-                  Background="{DynamicResource SecondaryRegionBrush}">
+            <Grid Grid.Column="1" Background="{DynamicResource SecondaryRegionBrush}">
+                <Border Margin="16" 
+                        Background="{DynamicResource RegionBrush}" 
+                        CornerRadius="6" 
+                        Effect="{StaticResource EffectShadow2}">
+                    <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+                </Border>
             </Grid>
         </Grid>
     </Grid>
